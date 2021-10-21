@@ -8,7 +8,7 @@ import pytz
 
 from discord.ext import commands
 
-my_secret = 'ODk2ODQ5MjQxNzQ0NDg2NDIw.YWNF8Q.mM02Wx3LNJ-cKSs4VQAyHNscWqg'
+my_secret = ''
 my_secret1 = 'RGAPI-0830d0d7-afdb-4c38-ac77-8e5d74b3f3dc'
 
 # client = discord.Client()
