@@ -9,7 +9,7 @@ import pytz
 import asyncio
 
 discordKey = ''
-my_secret1 = 'RGAPI-5ca291bd-bd74-4e3f-b97c-7c6ee3c8d201'
+my_secret1 = ''
 client = discord.Client()
 bot = commands.Bot(command_prefix='.')
 
