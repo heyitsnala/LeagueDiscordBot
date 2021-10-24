@@ -8,7 +8,7 @@ from datetime import datetime
 import pytz
 import asyncio
 
-discordKey = 'ODk2ODQ5MjQxNzQ0NDg2NDIw.YWNF8Q.6SyS3bLDF5IqUt5azKvhqU9z4Us'
+discordKey = ''
 my_secret1 = 'RGAPI-5ca291bd-bd74-4e3f-b97c-7c6ee3c8d201'
 client = discord.Client()
 bot = commands.Bot(command_prefix='.')
