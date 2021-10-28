@@ -44,7 +44,8 @@ async def on_ready():
 
 @bot.command()
 
-async def matchhistory(ctx, arg):
+async def matchhistory(ctx, *arg):
+    arg = " ".join(arg)
     for gId in guildIds:
         abc = await bot.fetch_guild(gId)
         for emote in abc.emojis:
@@ -143,17 +144,31 @@ async def matchhistory(ctx, arg):
     championIcon = "http://ddragon.leagueoflegends.com/cdn/11.20.1/img/champion/" + matchedPuuId()[
         'championName'] + ".png"
 
+    rankedInfo = {}
     summonerName = json.loads(responseSummonerName.text)['name']
     summonerLevel = json.loads(responseSummonerName.text)['summonerLevel']
     profileIcon = str(json.loads(responseSummonerName.text)['profileIconId'])
     gameVersion = json.loads(requests.get("https://ddragon.leagueoflegends.com/api/versions.json").text)[0]
     print(gameVersion)
     profileIconImage = "http://ddragon.leagueoflegends.com/cdn/11.20.1/img/profileicon/" + profileIcon + ".png"
-    soloQueue = json.loads(responseLol.text)[1]
-    flexQueue = json.loads(responseLol.text)[0]
 
+    summonerRank = json.loads(responseLol.text)
+    #soloQueue = json.loads(responseLol.text)[1]
+    #flexQueue = json.loads(responseLol.text)[0]
+
+    if summonerRank[0] == None:
+        return
+    else:
+        for queue in range(len(summonerRank)):
+            if summonerRank[queue] == None:
+                return
+            else:
+                rankedInfo[str(summonerRank[queue]['queueType']).replace("_"," ")] = [summonerRank[queue]['tier'],
+                summonerRank[queue]['rank'], summonerRank[queue]['wins'], summonerRank[queue]['losses']]
+
+    print(rankedInfo)
     #This will create an emoji of the rank note: name of emoji has to match rank
-    gold = discord.utils.get(ctx.guild.emojis, name=soloQueue['tier'].lower())
+    #gold = discord.utils.get(ctx.guild.emojis, name=soloQueue['tier'].lower())
 
     embed = discord.Embed(
         title="",
@@ -172,7 +187,26 @@ async def matchhistory(ctx, arg):
     embed.set_author(name=summonerName + " " + "<Level " + str(summonerLevel) + ">", icon_url=profileIconImage)
     embed.add_field(name = "Last Game Played",
                     value = queueId[str(lastMatchTypeTest)] + "\n" + str(easternTimeStamp),
-                    inline=False)
+                    inline=True)
+    embed.add_field(name = "Solo Queue",
+                    value = rankedInfo['RANKED SOLO 5x5'][0] + " " + rankedInfo['RANKED SOLO 5x5'][1] +
+                    " " + str(discord.utils.get(bot.emojis, name=rankedInfo['RANKED SOLO 5x5'][0].lower())) + "\n"
+                    + "W: " + str(rankedInfo['RANKED SOLO 5x5'][2]) + " L: " + str(rankedInfo['RANKED SOLO 5x5'][3]) + "\n"
+                            + "WR " +
+                            str(round((rankedInfo['RANKED SOLO 5x5'][2] / (
+                                        rankedInfo['RANKED SOLO 5x5'][2] + rankedInfo['RANKED SOLO 5x5'][3])) * 100, 2))
+                            + "%"
+                    ,
+                    inline = True)
+    embed.add_field(name = "Flex Queue",
+                    value = rankedInfo['RANKED FLEX SR'][0] + " " + rankedInfo['RANKED FLEX SR'][1]
+                    + str(discord.utils.get(bot.emojis, name=rankedInfo['RANKED FLEX SR'][0].lower())) + "\n"
+                    + "W: " + str(rankedInfo['RANKED FLEX SR'][2]) + " L: " + str(rankedInfo['RANKED FLEX SR'][3]) + "\n"
+                    + "WR " +
+                    str(round((rankedInfo['RANKED FLEX SR'][2] / (rankedInfo['RANKED FLEX SR'][2] + rankedInfo['RANKED FLEX SR'][3])) * 100, 2))
+                    + "%",
+                    inline = True
+                    )
     embed.add_field(name="Blue Side" + blueSideResult(),
                     value=str(discord.utils.get(bot.emojis, name=lastMatchPlayer[0]['championName'])) + " " + lastMatchPlayer[0]['summonerName'] + "\n"
                     + str(discord.utils.get(bot.emojis, name=lastMatchPlayer[1]['championName'])) + " " + lastMatchPlayer[1]['summonerName'] + "\n"
