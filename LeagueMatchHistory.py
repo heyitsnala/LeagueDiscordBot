@@ -22,6 +22,22 @@ itemIndex = range(7)
 print(summonerIndex)
 itemApi = ['item0', 'item1', 'item2', 'item3', 'item4', 'item5', 'item6']
 
+queueId = {}
+queueIdList = requests.get("https://static.developer.riotgames.com/docs/lol/queues.json")
+queueIdListJson = json.loads(queueIdList.text)
+for queueIndex in range(len(json.loads(queueIdList.text))):
+    queueId[str(queueIdListJson[queueIndex]['queueId'])] = queueIdListJson[queueIndex]['description']
+    for queueDescIndex in queueId:
+        if queueId[str(queueIdListJson[queueIndex]['queueId'])] == None:
+            queueId[str(queueIdListJson[queueIndex]['queueId'])] = "Custom"
+        queueId[str(queueIdListJson[queueIndex]['queueId'])] = queueId[str(queueIdListJson[queueIndex]['queueId'])].replace(" games", "")
+
+# print(queueId)
+# queueId[str(1)] = str(queueId[str(1)]).replace(" games", "")
+
+print(queueId)
+print(queueIdListJson)
+
 @bot.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(bot))
@@ -66,10 +82,11 @@ async def matchhistory(ctx, arg):
     # This whole section is to last game played info [date/kda/match type]
     lastPlayedDate = json.loads(responseLastPlayed.text)['info']['gameEndTimestamp']
     lastMatchType = json.loads(responseLastPlayed.text)['info']['gameMode']
+    lastMatchTypeTest = json.loads(responseLastPlayed.text)['info']['queueId']
     lastMatchPlayer = json.loads(responseLastPlayed.text)['info']['participants']
     winLossBlue = json.loads(responseLastPlayed.text)['info']['teams'][0]
     winLossRed = json.loads(responseLastPlayed.text)['info']['teams'][1]
-
+    print(queueId[str(lastMatchTypeTest)])
     def blueSideResult():
         if winLossBlue['win'] == True:
             return " <WIN>"
@@ -154,7 +171,7 @@ async def matchhistory(ctx, arg):
     embed.set_thumbnail(url="https://static.u.gg/assets/lol/riot_static/11.20.1/img/champion/Xayah.png")
     embed.set_author(name=summonerName + " " + "<Level " + str(summonerLevel) + ">", icon_url=profileIconImage)
     embed.add_field(name = "Last Game Played",
-                    value = lastMatchType + "\n" + str(easternTimeStamp),
+                    value = queueId[str(lastMatchTypeTest)] + "\n" + str(easternTimeStamp),
                     inline=False)
     embed.add_field(name="Blue Side" + blueSideResult(),
                     value=str(discord.utils.get(bot.emojis, name=lastMatchPlayer[0]['championName'])) + " " + lastMatchPlayer[0]['summonerName'] + "\n"
