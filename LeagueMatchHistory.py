@@ -144,6 +144,7 @@ async def matchhistory(ctx, *arg):
     championIcon = "http://ddragon.leagueoflegends.com/cdn/11.20.1/img/champion/" + matchedPuuId()[
         'championName'] + ".png"
 
+
     rankedInfo = {}
     summonerName = json.loads(responseSummonerName.text)['name']
     summonerLevel = json.loads(responseSummonerName.text)['summonerLevel']
@@ -156,19 +157,48 @@ async def matchhistory(ctx, *arg):
     #soloQueue = json.loads(responseLol.text)[1]
     #flexQueue = json.loads(responseLol.text)[0]
 
-    if summonerRank[0] == None:
-        return
+    # if summonerRank[0] == None:
+    #     return
+    # else:
+    #     for queue in range(len(summonerRank)):
+    #         if summonerRank[queue] == None:
+    #             return
+    #         else:
+    #             rankedInfo[str(summonerRank[queue]['queueType']).replace("_"," ")] = [summonerRank[queue]['tier'],
+    #             summonerRank[queue]['rank'], summonerRank[queue]['wins'], summonerRank[queue]['losses']]
+
+    if len(summonerRank) == 0:
+        rankedInfo['RANKED SOLO 5x5'] = ['NA', 'NA', 'NA', 'NA']
+        rankedInfo['RANKED FLEX SR'] = ['NA', 'NA', 'NA', 'NA']
+    elif len(summonerRank) == 1:
+        rankedInfo[str(summonerRank[0]['queueType']).replace("_", " ")] = [summonerRank[0]['tier'],
+                                                                         summonerRank[0]['rank'],
+                                                                         summonerRank[0]['wins'],
+                                                                         summonerRank[0]['losses']]
+        rankedInfo['RANKED FLEX SR'] = ['NA', 'NA', 'NA', 'NA']
     else:
         for queue in range(len(summonerRank)):
-            if summonerRank[queue] == None:
-                return
-            else:
-                rankedInfo[str(summonerRank[queue]['queueType']).replace("_"," ")] = [summonerRank[queue]['tier'],
-                summonerRank[queue]['rank'], summonerRank[queue]['wins'], summonerRank[queue]['losses']]
+            rankedInfo[str(summonerRank[queue]['queueType']).replace("_", " ")] = [summonerRank[queue]['tier'],
+                                                                                 summonerRank[queue]['rank'],
+                                                                                 summonerRank[queue]['wins'],
+                                                                                 summonerRank[queue]['losses']]
+    if type(rankedInfo['RANKED SOLO 5x5'][2]) == str:
+        soloWinRate = ""
+    elif type(rankedInfo['RANKED SOLO 5x5'][2]) == int:
+        soloWinRate = str(round((rankedInfo['RANKED SOLO 5x5'][2] / (rankedInfo['RANKED SOLO 5x5'][2] + rankedInfo['RANKED SOLO 5x5'][3])) * 100, 2)) + "%"
+
+    if type(rankedInfo['RANKED FLEX SR'][2]) == str:
+        flexWinRate = ""
+    elif type(rankedInfo['RANKED FLEX SR'][2]) == int:
+        flexWinRate = str(round((rankedInfo['RANKED FLEX SR'][2] / (
+                            rankedInfo['RANKED FLEX SR'][2] + rankedInfo['RANKED FLEX SR'][3])) * 100, 2)) + "%"
+
 
     print(rankedInfo)
     #This will create an emoji of the rank note: name of emoji has to match rank
     #gold = discord.utils.get(ctx.guild.emojis, name=soloQueue['tier'].lower())
+
+
 
     embed = discord.Embed(
         title="",
@@ -192,19 +222,14 @@ async def matchhistory(ctx, *arg):
                     value = rankedInfo['RANKED SOLO 5x5'][0] + " " + rankedInfo['RANKED SOLO 5x5'][1] +
                     " " + str(discord.utils.get(bot.emojis, name=rankedInfo['RANKED SOLO 5x5'][0].lower())) + "\n"
                     + "W: " + str(rankedInfo['RANKED SOLO 5x5'][2]) + " L: " + str(rankedInfo['RANKED SOLO 5x5'][3]) + "\n"
-                            + "WR " +
-                            str(round((rankedInfo['RANKED SOLO 5x5'][2] / (
-                                        rankedInfo['RANKED SOLO 5x5'][2] + rankedInfo['RANKED SOLO 5x5'][3])) * 100, 2))
-                            + "%"
+                            + "WR " + soloWinRate
                     ,
                     inline = True)
     embed.add_field(name = "Flex Queue",
-                    value = rankedInfo['RANKED FLEX SR'][0] + " " + rankedInfo['RANKED FLEX SR'][1]
+                    value = rankedInfo['RANKED FLEX SR'][0] + " " + rankedInfo['RANKED FLEX SR'][1] + " "
                     + str(discord.utils.get(bot.emojis, name=rankedInfo['RANKED FLEX SR'][0].lower())) + "\n"
                     + "W: " + str(rankedInfo['RANKED FLEX SR'][2]) + " L: " + str(rankedInfo['RANKED FLEX SR'][3]) + "\n"
-                    + "WR " +
-                    str(round((rankedInfo['RANKED FLEX SR'][2] / (rankedInfo['RANKED FLEX SR'][2] + rankedInfo['RANKED FLEX SR'][3])) * 100, 2))
-                    + "%",
+                    + "WR " + flexWinRate,
                     inline = True
                     )
     embed.add_field(name="Blue Side" + blueSideResult(),
